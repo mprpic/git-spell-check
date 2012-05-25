@@ -20,6 +20,7 @@ DICT=~/.git-spell-check
 if [ ! -f $DICT ]; then
     touch ~/.git-spell-check
     DICT=~/.git-spell-check
+    echo "Custom dictionary not found. Created ~/.git-spell-check..."
 fi
 
 

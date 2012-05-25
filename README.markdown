@@ -3,7 +3,7 @@ Instructions
 
 This script is a Git pre-commit hook that spell checks any content you are about to commit.
 
-Place this script into the **.git/hooks/** directory in your repository. It must be called **pre-commit** and be executable. A Git hook only works in a single repository. You need to copy this hook into every repository you wish to use it in manually. Optionally, you can set up a symlink in the **.git/hooks/**" directory pointing to the script.
+Place this script into the **.git/hooks/** directory in your repository. It must be called **pre-commit** and be executable. A Git hook only works in a single repository. You need to copy this hook into every repository you wish to use it in manually. Optionally, you can set up a symlink in the **.git/hooks/** directory pointing to the script.
 
 Each time you try to commit something, this script is run and spell checks the content you are committing.
 
