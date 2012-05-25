@@ -26,10 +26,10 @@ fi
 
 # The following is a temporary dictionary (a binary file) created from the DICT text file. It is deleted after the
 # script finishes.
-TEMP_DICT=$(mktemp /tmp/docs-dictionary-XXXXXX)
+TEMP_DICT=$(mktemp --tmpdir docs-dictionary-XXXXXX)
 
 # Language of your doc. When using a non-English language, make sure you have the appropriate aspell libraries
-# installed: "yum search aspell". For example, to spell check in Slovak, you must have the aspell-sk package installed
+# installed: "yum search aspell". For example, to spell check in Slovak, you must have the aspell-sk package installed.
 LANG=en
 
 # Clean up if script is interrupted or terminated.
@@ -53,7 +53,7 @@ function cleanup() {
 # commit).
 function spell_check() {
 
-    WORDS=`git diff --cached | grep -e "^+[^+]" | aspell --mode=sgml list --add-sgml-skip={ulink,code,literal,firstname,parameter,option,package,replaceable,programlisting,userinput,screen,filename,command,computeroutput,abbrev,accel,orgname,surname,foreignphrase,acronym,hardware,keycap,systemitem,application} --lang="$LANG" --extra-dicts="$TEMP_DICT" | sort | uniq` # add all SGML tags into your custom dictionary if you want to remove the "--add-sgml-skip" option.
+    WORDS=$(git diff --cached | grep -e "^+[^+]" | aspell --mode=sgml list --add-sgml-skip={ulink,code,literal,firstname,parameter,option,package,replaceable,programlisting,userinput,screen,filename,command,computeroutput,abbrev,accel,orgname,surname,foreignphrase,acronym,hardware,keycap,systemitem,application} --lang="$LANG" --extra-dicts="$TEMP_DICT" | sort | uniq) # add all SGML tags into your custom dictionary if you want to remove the "--add-sgml-skip" option.
     if [ ! "$WORDS" ]; then
 	cleanup; exit 0
     fi
@@ -88,7 +88,7 @@ Add any of the misspelled words into your custom dictionary?
 		;;
 	    s|some)
 		add_some
-		echo "Please fix remaining typos, use \"git add\" to add fixed files, and commit."
+		echo -e "\nPlease fix remaining typos, use \"git add\" to add fixed files, and commit."
 		cleanup; exit 1
 		;;
 	    i|ignore)
@@ -129,7 +129,7 @@ function add_some() {
 	    case "$answer" in
 		y|yes)
 		    echo $WORD >> "$DICT"
-		    echo "\"$WORD\" added to your custom dictionary"
+		    echo "\"$WORD\" added to your custom dictionary."
 		    break ;;
 		n|no)
 		    break ;;
