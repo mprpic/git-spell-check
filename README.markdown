@@ -1,4 +1,5 @@
-Instructions:
+Instructions
+------------
 
 This script is a Git pre-commit hook that spell checks any content you are about to commit.
 
@@ -9,7 +10,8 @@ Each time you try to commit something, this script is run and spell checks the c
 Should you want to bypass the pre-commit hook (though not recommended), you can commit with "git commit --no-verify".
 
 
-TODO:
+To-Do
+-----
 
 1. Use printf instead of echo.
 
