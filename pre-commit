@@ -16,21 +16,21 @@ set -e
 
 # The following is a text file that represents your custom dictionary; edit as necessary. Add words to it that you wish
 # to ignore for the spell check.
-DICT=~/.git-spell-check
-if [ ! -f $DICT ]; then
+dict=~/.git-spell-check
+if [ ! -f $dict ]; then
     touch ~/.git-spell-check
-    DICT=~/.git-spell-check
+    dict=~/.git-spell-check
     echo "Custom dictionary not found. Created ~/.git-spell-check..."
 fi
 
 
-# The following is a temporary dictionary (a binary file) created from the DICT text file. It is deleted after the
+# The following is a temporary dictionary (a binary file) created from the dict text file. It is deleted after the
 # script finishes.
-TEMP_DICT=$(mktemp --tmpdir docs-dictionary-XXXXXX)
+temp_dict=$(mktemp --tmpdir docs-dictionary-XXXXXX)
 
 # Language of your doc. When using a non-English language, make sure you have the appropriate aspell libraries
 # installed: "yum search aspell". For example, to spell check in Slovak, you must have the aspell-sk package installed.
-LANG=en
+lang=en
 
 # Clean up if script is interrupted or terminated.
 trap "cleanup" SIGINT SIGTERM 
@@ -38,14 +38,14 @@ trap "cleanup" SIGINT SIGTERM
 # Prepares the dictionary from scratch in case new words were added since last time.
 function prepare_dictionary() {
 
-    cat "$DICT" | aspell --lang="$LANG" create master "$TEMP_DICT"
+    aspell --lang="$lang" create master "$temp_dict" < "$dict"
 
 }
 
 # Removes the temporary dictionary.
 function cleanup() {
 
-    /bin/rm -f "$TEMP_DICT"
+    /bin/rm -f "$temp_dict"
 
 }
 
@@ -53,14 +53,14 @@ function cleanup() {
 # commit).
 function spell_check() {
 
-    WORDS=$(git diff --cached | grep -e "^+[^+]" | aspell --mode=sgml list --add-sgml-skip={ulink,code,literal,firstname,parameter,option,package,replaceable,programlisting,userinput,screen,filename,command,computeroutput,abbrev,accel,orgname,surname,foreignphrase,acronym,hardware,keycap,systemitem,application} --lang="$LANG" --extra-dicts="$TEMP_DICT" | sort | uniq) # add all SGML tags into your custom dictionary if you want to remove the "--add-sgml-skip" option.
-    if [ ! "$WORDS" ]; then
+    words=$(git diff --cached | grep -e "^+[^+]" | aspell --mode=sgml list --add-sgml-skip={ulink,code,literal,firstname,parameter,option,package,replaceable,programlisting,userinput,screen,filename,command,computeroutput,abbrev,accel,orgname,surname,foreignphrase,acronym,hardware,keycap,systemitem,application} --lang="$lang" --extra-dicts="$temp_dict" | sort | uniq) # add all SGML tags into your custom dictionary if you want to remove the "--add-sgml-skip" option.
+    if [ ! "$words" ]; then
 	cleanup; exit 0
     fi
     echo "Spell check failed on the following words:"
     echo "-------------------------------------------------"
-    for WORD in ${WORDS}; do
-	grep --color=always --exclude-dir={.git,tmp} -Irone "$WORD" $(git diff --cached --name-only) | awk -F ":" '{print "File: " $1 "\ton line: " $2 "\tTypo: " $3}'
+    for word in ${words}; do
+	grep --color=always --exclude-dir={.git,tmp} -Irone "$word" $(git diff --cached --name-only) | awk -F ":" '{print "File: " $1 "\ton line: " $2 "\tTypo: " $3}'
 	echo -e "-------------------"
     done
 
@@ -111,8 +111,8 @@ Add any of the misspelled words into your custom dictionary?
 # Adds all words to the custom dictionary and continues with the commit.
 function add_all() {
 
-    for WORD in $WORDS; do
-	echo $WORD >> "$DICT"
+    for word in $words; do
+	echo $word >> "$dict"
     done
 
 }
@@ -120,16 +120,16 @@ function add_all() {
 # Adds some (selected by user) of the words to the dictinary and exits with 1.
 function add_some() {
 
-    for WORD in $WORDS; do
-	echo "Do you want to add the following word to your custom dictionary: $WORD  (y[es] or n[o])"
+    for word in $words; do
+	echo "Do you want to add the following word to your custom dictionary: $word  (y[es] or n[o])"
 	while true; do
 	    exec < /dev/tty
 	    read answer
 	    shopt -s nocasematch
 	    case "$answer" in
 		y|yes)
-		    echo $WORD >> "$DICT"
-		    echo "\"$WORD\" added to your custom dictionary."
+		    echo $word >> "$dict"
+		    echo "\"$word\" added to your custom dictionary."
 		    break ;;
 		n|no)
 		    break ;;
