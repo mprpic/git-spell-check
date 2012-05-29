@@ -79,9 +79,9 @@ Add any of the misspelled words into your custom dictionary?
 
     while true; do
 	exec < /dev/tty # Simply reading user input does not work because Git hooks have stdin detached.
-	read ANSWER
+	read answer
 	shopt -s nocasematch
-	case "$ANSWER" in
+	case "$answer" in
 	    a|all)
 		add_all
 		cleanup; exit 0
