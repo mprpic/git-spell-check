@@ -11,7 +11,13 @@ Place this script into the **.git/hooks/** directory in your repository. It must
 
     book]$ ln -s ~/git-spell-check/pre-commit .git/hooks/pre-commit
 
-Each time you try to commit something, this script is run and spell checks the content you are committing.
+Each time you try to commit something, this script is run to spell check the content you are committing. If misspelled words are found, you can either save them into a custom Aspell dictionary (which means they will be ignored next time the script is run), or ignore them. The following options are available when the script is run:
+
+    Add any of the misspelled words into your custom dictionary?
+      * a[ll]     (add all words into dict, continue with commit)
+      * s[ome]    (add some words into dict, fix others, no commit)
+      * i[gnore]  (add some words into dict, ignore rest, continue with commit)
+      * n[one]    (no commit)
 
 Should you want to bypass the pre-commit hook (though not recommended), you can commit with **git commit --no-verify**.
 
