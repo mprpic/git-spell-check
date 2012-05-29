@@ -60,7 +60,7 @@ function spell_check() {
     echo "Spell check failed on the following words:"
     echo "-------------------------------------------------"
     for word in ${words}; do
-	grep --color=always --exclude-dir={.git,tmp} -Irone "$word" $(git diff --cached --name-only) | awk -F ":" '{print "File: " $1 "\ton line: " $2 "\tTypo: " $3}'
+	grep --color=always --exclude-dir={.git,tmp} -Irone "\<$word\>" $(git diff --cached --name-only) | awk -F ":" '{print "File: " $1 "\ton line: " $2 "\tTypo: " $3}'
 	echo -e "-------------------"
     done
 
