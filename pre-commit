@@ -45,15 +45,15 @@ function prepare_dictionary() {
 
     local_dict=$(find . -name *.$extension -exec ls {} \;)
     if [ -z "$local_dict" ]; then
-	aspell --lang="$lang" create master "$temp_dict" < "$dict"
+        aspell --lang="$lang" create master "$temp_dict" < "$dict"
     else
-	temp_file=$(mktemp --tmpdir temp_file-XXXXXX)
-	for file in $local_dict; do
-	    cat $file >> $temp_file
-	done
-	cat $dict >> $temp_file
-	aspell --lang="$lang" create master "$temp_dict" < "$temp_file"
-	/bin/rm -f "$temp_file"
+        temp_file=$(mktemp --tmpdir temp_file-XXXXXX)
+        for file in $local_dict; do
+            cat $file >> $temp_file
+        done
+        cat $dict >> $temp_file
+        aspell --lang="$lang" create master "$temp_dict" < "$temp_file"
+        /bin/rm -f "$temp_file"
     fi
 
 }
@@ -71,13 +71,13 @@ function spell_check() {
 
     words=$(git diff --cached | grep -e "^+[^+]" | aspell --mode=sgml list --add-sgml-skip={ulink,code,literal,firstname,parameter,option,package,replaceable,programlisting,userinput,screen,filename,command,computeroutput,abbrev,accel,orgname,surname,foreignphrase,acronym,hardware,keycap,systemitem,application} --lang="$lang" --extra-dicts="$temp_dict" | sort | uniq)
     if [ ! "$words" ]; then
-	cleanup; exit 0
+        cleanup; exit 0
     fi
     printf "%s\n" "Spell check failed on the following words:
 -------------------------------------------------"
     for word in $words; do
-	grep --color=always --exclude-dir={.git,tmp} -HIrone "\<$word\>" $(git diff --cached --name-only) | awk -F ":" '{print "File: " $1 "\ton line: " $2 "\tTypo: " $3}'
-	printf "%s\n" "-------------------"
+        grep --color=always --exclude-dir={.git,tmp} -HIrone "\<$word\>" $(git diff --cached --name-only) | awk -F ":" '{print "File: " $1 "\ton line: " $2 "\tTypo: " $3}'
+        printf "%s\n" "-------------------"
     done
 
 }
@@ -94,32 +94,32 @@ Add any of the misspelled words into your custom dictionary?
 "
 
     while true; do
-	exec < /dev/tty # Simply reading user input does not work because Git hooks have stdin detached.
-	read answer
-	shopt -s nocasematch
-	case "$answer" in
-	    a|all)
-		add_all
-		cleanup; exit 0
-		;;
-	    s|some)
-		add_some
-		printf "%s\n" "Please fix remaining typos, use \"git add\" to add fixed files, and commit."
-		cleanup; exit 1
-		;;
-	    i|ignore)
-		add_some
-		cleanup; exit 0
-		;;
-	    n|none)
-		add_none
-		cleanup; exit 1
-		;;
-	    *) 
-		printf "%s\n" "Incorrect answer. Try again."
-		continue
-	esac
-	shopt -u nocasematch
+        exec < /dev/tty # Simply reading user input does not work because Git hooks have stdin detached.
+        read answer
+        shopt -s nocasematch
+        case "$answer" in
+            a|all)
+                add_all
+                cleanup; exit 0
+                ;;
+            s|some)
+                add_some
+                printf "%s\n" "Please fix remaining typos, use \"git add\" to add fixed files, and commit."
+                cleanup; exit 1
+                ;;
+            i|ignore)
+                add_some
+                cleanup; exit 0
+                ;;
+            n|none)
+                add_none
+                cleanup; exit 1
+                ;;
+            *) 
+                printf "%s\n" "Incorrect answer. Try again."
+                continue
+        esac
+        shopt -u nocasematch
     done
 
 }
@@ -128,7 +128,7 @@ Add any of the misspelled words into your custom dictionary?
 function add_all() {
 
     for word in $words; do
-	echo $word >> "$dict"
+        echo $word >> "$dict"
     done
 
 }
@@ -137,24 +137,24 @@ function add_all() {
 function add_some() {
 
     for word in $words; do
-	printf "%s\n" "Do you want to add the following word to your custom dictionary: $word  (y[es] or n[o])"
-	while true; do
-	    exec < /dev/tty
-	    read answer
-	    shopt -s nocasematch
-	    case "$answer" in
-		y|yes)
-		    echo $word >> "$dict"
-		    printf "%s\n" "\"$word\" added to your custom dictionary."
-		    break ;;
-		n|no)
-		    break ;;
-		*) 
-		    printf "%s\n" "Incorrect answer. Try again."
-		    continue
-	    esac
+        printf "%s\n" "Do you want to add the following word to your custom dictionary: $word  (y[es] or n[o])"
+        while true; do
+            exec < /dev/tty
+            read answer
+            shopt -s nocasematch
+            case "$answer" in
+                y|yes)
+                    echo $word >> "$dict"
+                    printf "%s\n" "\"$word\" added to your custom dictionary."
+                    break ;;
+                n|no)
+                    break ;;
+                *) 
+                    printf "%s\n" "Incorrect answer. Try again."
+                    continue
+            esac
             shopt -u nocasematch
-	done
+        done
     done
 
 }
