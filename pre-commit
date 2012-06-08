@@ -45,6 +45,7 @@ function prepare_dictionary() {
 
     local_dict=$(find . -name *.$extension -exec ls {} \;)
     if [ -z "$local_dict" ]; then
+        sort -u $temp_dict -o $temp_dict
         aspell --lang="$lang" create master "$temp_dict" < "$dict"
     else
         temp_file=$(mktemp --tmpdir temp_file-XXXXXX)
@@ -52,6 +53,7 @@ function prepare_dictionary() {
             cat $file >> $temp_file
         done
         cat $dict >> $temp_file
+        sort -u $temp_file -o $temp_file
         aspell --lang="$lang" create master "$temp_dict" < "$temp_file"
         /bin/rm -f "$temp_file"
     fi
@@ -69,7 +71,7 @@ function cleanup() {
 # commit).
 function spell_check() {
 
-    words=$(git diff --cached | grep -e "^+[^+]" | aspell --mode=sgml list --add-sgml-skip={ulink,code,literal,firstname,parameter,option,package,replaceable,programlisting,userinput,screen,filename,command,computeroutput,abbrev,accel,orgname,surname,foreignphrase,acronym,hardware,keycap,systemitem,application} --lang="$lang" --extra-dicts="$temp_dict" | sort | uniq)
+    words=$(git diff --cached | grep -e "^+[^+]" | aspell --mode=sgml list --add-sgml-skip={ulink,code,literal,firstname,parameter,option,package,replaceable,programlisting,userinput,screen,filename,command,computeroutput,abbrev,accel,orgname,surname,foreignphrase,acronym,hardware,keycap,systemitem,application} --lang="$lang" --extra-dicts="$temp_dict" | sort -u)
     if [ ! "$words" ]; then
         cleanup; exit 0
     fi
