@@ -20,7 +20,7 @@ dict=~/.git-spell-check
 if [ ! -f $dict ]; then
     touch ~/.git-spell-check
     dict=~/.git-spell-check
-    echo "Custom dictionary not found. Created ~/.git-spell-check..."
+    printf "%s\n" "Custom dictionary not found. Created ~/.git-spell-check..."
 fi
 
 
@@ -53,15 +53,15 @@ function cleanup() {
 # commit).
 function spell_check() {
 
-    words=$(git diff --cached | grep -e "^+[^+]" | aspell --mode=sgml list --add-sgml-skip={ulink,code,literal,firstname,parameter,option,package,replaceable,programlisting,userinput,screen,filename,command,computeroutput,abbrev,accel,orgname,surname,foreignphrase,acronym,hardware,keycap,systemitem,application} --lang="$lang" --extra-dicts="$temp_dict" | sort | uniq) # add all SGML tags into your custom dictionary if you want to remove the "--add-sgml-skip" option.
+    words=$(git diff --cached | grep -e "^+[^+]" | aspell --mode=sgml list --add-sgml-skip={ulink,code,literal,firstname,parameter,option,package,replaceable,programlisting,userinput,screen,filename,command,computeroutput,abbrev,accel,orgname,surname,foreignphrase,acronym,hardware,keycap,systemitem,application} --lang="$lang" --extra-dicts="$temp_dict" | sort | uniq)
     if [ ! "$words" ]; then
 	cleanup; exit 0
     fi
-    echo "Spell check failed on the following words:"
-    echo "-------------------------------------------------"
+    printf "%s\n" "Spell check failed on the following words:
+-------------------------------------------------"
     for word in ${words}; do
 	grep --color=always --exclude-dir={.git,tmp} -HIrone "\<$word\>" $(git diff --cached --name-only) | awk -F ":" '{print "File: " $1 "\ton line: " $2 "\tTypo: " $3}'
-	echo -e "-------------------"
+	printf "%s\n" "-------------------"
     done
 
 }
@@ -69,7 +69,7 @@ function spell_check() {
 # Adds all, some, or none of the misspelled words to the custom dictionary.
 function add_words_to_dict() {
 
-    echo -e "
+    printf "%s\n" "
 Add any of the misspelled words into your custom dictionary?
   * a[ll]     (add all words into dict, continue with commit)
   * s[ome]    (add some words into dict, fix others, no commit)
@@ -88,7 +88,7 @@ Add any of the misspelled words into your custom dictionary?
 		;;
 	    s|some)
 		add_some
-		echo -e "\nPlease fix remaining typos, use \"git add\" to add fixed files, and commit."
+		printf "%s\n" "Please fix remaining typos, use \"git add\" to add fixed files, and commit."
 		cleanup; exit 1
 		;;
 	    i|ignore)
@@ -100,7 +100,7 @@ Add any of the misspelled words into your custom dictionary?
 		cleanup; exit 1
 		;;
 	    *) 
-		echo "Incorrect answer. Try again."
+		printf "%s\n" "Incorrect answer. Try again."
 		continue
 	esac
 	shopt -u nocasematch
@@ -121,7 +121,7 @@ function add_all() {
 function add_some() {
 
     for word in $words; do
-	echo "Do you want to add the following word to your custom dictionary: $word  (y[es] or n[o])"
+	printf "%s\n" "Do you want to add the following word to your custom dictionary: $word  (y[es] or n[o])"
 	while true; do
 	    exec < /dev/tty
 	    read answer
@@ -129,12 +129,12 @@ function add_some() {
 	    case "$answer" in
 		y|yes)
 		    echo $word >> "$dict"
-		    echo "\"$word\" added to your custom dictionary."
+		    printf "%s\n" "\"$word\" added to your custom dictionary."
 		    break ;;
 		n|no)
 		    break ;;
 		*) 
-		    echo "Incorrect answer. Try again."
+		    printf "%s\n" "Incorrect answer. Try again."
 		    continue
 	    esac
             shopt -u nocasematch
@@ -146,8 +146,8 @@ function add_some() {
 # Adds none of the words and exits with 1.
 function add_none() {
 
-    echo -e "\nNo words were added to your custom dictionary."
-    echo "Please fix remaining typos, use \"git add\" to add fixed files, and commit."
+    printf "%s\n" "No words were added to your custom dictionary."
+    printf "%s\n" "Please fix remaining typos, use \"git add\" to add fixed files, and commit."
 
 }
 
