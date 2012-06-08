@@ -32,13 +32,29 @@ temp_dict=$(mktemp --tmpdir docs-dictionary-XXXXXX)
 # installed: "yum search aspell". For example, to spell check in Slovak, you must have the aspell-sk package installed.
 lang=en
 
+# Define an extension for any additional dictionaries (containing words that are ignored during the spell check) that
+# are kept locally in your repository. These dictionaries will be loaded on top of the existing global dictionary (by
+# default ~/.git-spell-check).
+extension=pws
+
 # Clean up if script is interrupted or terminated.
 trap "cleanup" SIGINT SIGTERM 
 
 # Prepares the dictionary from scratch in case new words were added since last time.
 function prepare_dictionary() {
 
-    aspell --lang="$lang" create master "$temp_dict" < "$dict"
+    local_dict=$(find . -name *.$extension -exec ls {} \;)
+    if [ -z "$local_dict" ]; then
+	aspell --lang="$lang" create master "$temp_dict" < "$dict"
+    else
+	temp_file=$(mktemp --tmpdir temp_file-XXXXXX)
+	for file in $local_dict; do
+	    cat $file >> $temp_file
+	done
+	cat $dict >> $temp_file
+	aspell --lang="$lang" create master "$temp_dict" < "$temp_file"
+	/bin/rm -f "$temp_file"
+    fi
 
 }
 
@@ -59,7 +75,7 @@ function spell_check() {
     fi
     printf "%s\n" "Spell check failed on the following words:
 -------------------------------------------------"
-    for word in ${words}; do
+    for word in $words; do
 	grep --color=always --exclude-dir={.git,tmp} -HIrone "\<$word\>" $(git diff --cached --name-only) | awk -F ":" '{print "File: " $1 "\ton line: " $2 "\tTypo: " $3}'
 	printf "%s\n" "-------------------"
     done

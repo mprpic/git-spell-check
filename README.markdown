@@ -20,11 +20,3 @@ Each time you try to commit something, this script is run to spell check the con
       * n[one]    (no commit)
 
 Should you want to bypass the pre-commit hook (though not recommended), you can commit with **git commit --no-verify**.
-
-
-To-Do
------
-
-1. Use **printf** instead of **echo**.
-
-2. Global/Local dictionary for ignored words?
