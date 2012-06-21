@@ -20,3 +20,11 @@ Each time you try to commit something, this script is run to spell check the con
       * n[one]    (no commit)
 
 Should you want to bypass the pre-commit hook (though not recommended), you can commit with **git commit --no-verify**.
+
+
+To-Do
+-----
+
+* When files are moved with **git mv**, **git diff --cached --name-only** shows both files and **grep** can't find one of them.
+
+* Aspell considers foo_bar two words, and **grep** greps for word boundaries around foo and bar.
