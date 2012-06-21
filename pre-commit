@@ -73,6 +73,7 @@ function spell_check() {
 
     words=$(git diff --cached | grep -e "^+[^+]" | aspell --mode=sgml list --add-sgml-skip={ulink,code,literal,firstname,parameter,option,package,replaceable,programlisting,userinput,screen,filename,command,computeroutput,abbrev,accel,orgname,surname,foreignphrase,acronym,hardware,keycap,systemitem,application} --lang="$lang" --extra-dicts="$temp_dict" | sort -u)
     if [ ! "$words" ]; then
+        printf "%s\n" "No typos found. Proceeding with commit..."
         cleanup; exit 0
     fi
     printf "%s\n" "Spell check failed on the following words:
