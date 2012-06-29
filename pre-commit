@@ -78,8 +78,9 @@ function spell_check() {
     fi
     printf "%s\n" "Spell check failed on the following words:
 -------------------------------------------------"
+    echo $words
     for word in $words; do
-        grep --color=always --exclude-dir={.git,tmp} -HIrone "\<$word\>" $(git diff --cached --name-only) | awk -F ":" '{print "File: " $1 "\ton line: " $2 "\tTypo: " $3}'
+        grep --color=always --exclude-dir={.git,tmp} -HIrone "\<$word\>" $(git diff --cached --name-only --diff-filter=ACMRTUXB) | awk -F ":" '{print "File: " $1 "\ton line: " $2 "\tTypo: " $3}'
         printf "%s\n" "-------------------"
     done
 
