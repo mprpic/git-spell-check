@@ -1,7 +1,7 @@
 Instructions
 ------------
 
-This script is a Git pre-commit hook that spell checks any content you are about to commit.
+This script is a Git pre-commit hook that spell checks changes in XML files which you are about to commit. This hook is useful in your documentation projects written in DocBook.
 
 To use this script, clone the following repo:
 
