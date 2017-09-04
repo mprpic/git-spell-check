@@ -26,7 +26,7 @@ fi
 
 # The following is a temporary dictionary (a binary file) created from the dict text file. It is deleted after the
 # script finishes.
-temp_dict=$(mktemp --tmpdir docs-dictionary-XXXXXX)
+temp_dict=$(mktemp docs-dictionary-XXXXXX)
 
 # Language of your doc. When using a non-English language, make sure you have the appropriate aspell libraries
 # installed: "yum search aspell". For example, to spell check in Slovak, you must have the aspell-sk package installed.
@@ -48,7 +48,7 @@ function prepare_dictionary() {
         sort -u $temp_dict -o $temp_dict
         aspell --lang="$lang" create master "$temp_dict" < "$dict"
     else
-        temp_file=$(mktemp --tmpdir temp_file-XXXXXX)
+        temp_file=$(mktemp temp_file-XXXXXX)
         for file in $local_dict; do
             cat $file >> $temp_file
         done
