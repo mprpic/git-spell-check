@@ -1,7 +1,7 @@
 Git Spell Check
 ===============
 
-This script is a Git pre-commit hook that spell checks changes in files which you are about to commit. This hook is useful in your documentation projects written in DocBook.
+This script is a Git pre-commit hook that spell checks changes in files which you are about to commit.
 
 
 Instructions
@@ -15,7 +15,7 @@ Place this script into the **.git/hooks/** directory in your repository. It must
 
     book]$ ln -s ~/git-spell-check/pre-commit .git/hooks/pre-commit
 
-You will need to install [`aspell`](http://aspell.net/).
+You will need to install [`aspell`](https://aspell.net/).
 
 On Mac:
 
