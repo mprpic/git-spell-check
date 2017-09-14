@@ -15,7 +15,7 @@ Place this script into the **.git/hooks/** directory in your repository. It must
 
     book]$ ln -s ~/git-spell-check/pre-commit .git/hooks/pre-commit
 
-You will need to install [`aspell`](https://aspell.net/).
+You will need to install [`aspell`](http://aspell.net/).
 
 On Mac:
 
