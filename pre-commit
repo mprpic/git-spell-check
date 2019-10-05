@@ -38,7 +38,7 @@ lang=en
 extension=pws
 
 # Clean up if script is interrupted or terminated.
-trap "cleanup" SIGINT SIGTERM 
+trap "cleanup" EXIT
 
 # Prepares the dictionary from scratch in case new words were added since last time.
 function prepare_dictionary() {
