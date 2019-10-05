@@ -17,7 +17,7 @@ set -e
 # The following is a text file that represents your custom dictionary; edit as necessary. Add words to it that you wish
 # to ignore for the spell check.
 dict=~/.git-spell-check
-if [ ! -f $dict ]; then
+if [ ! -f "$dict" ]; then
     touch ~/.git-spell-check
     dict=~/.git-spell-check
     printf "%s\n" "Custom dictionary not found. Created ~/.git-spell-check..."
@@ -43,17 +43,17 @@ trap "cleanup" EXIT
 # Prepares the dictionary from scratch in case new words were added since last time.
 function prepare_dictionary() {
 
-    local_dict=$(find . -name *.$extension -exec ls {} \;)
+    local_dict=$(find . -name "*.$extension" -exec ls {} \;)
     if [ -z "$local_dict" ]; then
-        sort -u $temp_dict -o $temp_dict
+        sort -u "$temp_dict" -o "$temp_dict"
         aspell --lang="$lang" create master ./"$temp_dict" < "$dict"
     else
         temp_file=$(mktemp temp_file-XXXXXX)
         for file in $local_dict; do
-            cat $file >> $temp_file
+            cat "$file" >> "$temp_file"
         done
-        cat $dict >> $temp_file
-        sort -u $temp_file -o $temp_file
+        cat "$dict" >> "$temp_file"
+        sort -u "$temp_file" -o "$temp_file"
         aspell --lang="$lang" create master "$temp_dict" < "$temp_file"
         /bin/rm -f "$temp_file"
     fi
@@ -69,22 +69,17 @@ function cleanup() {
 
 # Spell checks content you're about to commit. Writes out words that are misspelled or exits with 0 (i.e. continues with
 # commit).
-
-
 function spell_check() {
-    words=$(grep -v '^  ' $1 | aspell --mode=sgml list --add-sgml-skip={ulink,code,literal,firstname,parameter,option,package,replaceable,programlisting,userinput,screen,filename,command,computeroutput,abbrev,accel,orgname,surname,foreignphrase,acronym,hardware,keycap,systemitem,application} --lang="$lang" --extra-dicts=./"$temp_dict" | sort -u)
+    words=$(grep -v '^  ' "$1" | aspell --mode=sgml list --add-sgml-skip={ulink,code,literal,firstname,parameter,option,package,replaceable,programlisting,userinput,screen,filename,command,computeroutput,abbrev,accel,orgname,surname,foreignphrase,acronym,hardware,keycap,systemitem,application} --lang="$lang" --extra-dicts=./"$temp_dict" | sort -u)
     if [ ! "$words" ]; then
-        printf "%s\n" "No typos found. Proceeding with commit..."
+        printf "%s\n" "No typos found during commit msg. Proceeding with commit..."
         cleanup; exit 0
     fi
     printf "%s\n" "Commit message spell check failed on the following words:
 -------------------------------------------------"
-    echo $words
     for word in $words; do
-        grep --color=always --exclude-dir={.git,tmp} -HIrone "\<$word\>" $(git diff --cached --name-only --diff-filter=ACMRTUXB) | awk -F ":" '{print "File: " $1 "\ton line: " $2 "\tTypo: " $3}'
-        printf "%s\n" "-------------------"
+        grep -m 1 --color=always --exclude-dir={.git,tmp} -HIrone "\<$word\>" $1 | sort | awk -F ":" '{print "On line: " $2 "\tTypo: " $3}'
     done
-
 }
 
 # Adds all, some, or none of the misspelled words to the custom dictionary.
@@ -100,7 +95,7 @@ Add any of the misspelled words into your custom dictionary?
 
     while true; do
         exec < /dev/tty # Simply reading user input does not work because Git hooks have stdin detached.
-        read answer
+        read -r answer
         shopt -s nocasematch
         case "$answer" in
             a|all)
@@ -131,9 +126,8 @@ Add any of the misspelled words into your custom dictionary?
 
 # Adds all words to the custom dictionary and continues with the commit.
 function add_all() {
-
-    for word in $words; do
-        echo $word >> "$dict"
+    for word in $(echo "$words" | aspell clean); do
+        echo "$word" >> "$dict"
     done
 
 }
@@ -145,11 +139,11 @@ function add_some() {
         printf "%s\n" "Do you want to add the following word to your custom dictionary: $word  (y[es] or n[o])"
         while true; do
             exec < /dev/tty
-            read answer
+            read -r answer
             shopt -s nocasematch
             case "$answer" in
                 y|yes)
-                    echo $word >> "$dict"
+                    echo "$word" >> "$dict"
                     printf "%s\n" "\"$word\" added to your custom dictionary."
                     break ;;
                 n|no)
@@ -174,6 +168,6 @@ function add_none() {
 
 
 prepare_dictionary
-spell_check $1
+spell_check "$1"
 add_words_to_dict
-
+echo "finished commit-message spell check"
