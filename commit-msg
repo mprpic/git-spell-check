@@ -17,7 +17,7 @@ set -e
 # The following is a text file that represents your custom dictionary; edit as necessary. Add words to it that you wish
 # to ignore for the spell check.
 dict=~/.git-spell-check
-if [ ! -f $dict ]; then
+if [ ! -f "$dict" ]; then
     touch ~/.git-spell-check
     dict=~/.git-spell-check
     printf "%s\n" "Custom dictionary not found. Created ~/.git-spell-check..."
@@ -52,7 +52,7 @@ function prepare_dictionary() {
         for file in $local_dict; do
             cat "$file" >> "$temp_file"
         done
-        cat $dict >> "$temp_file"
+        cat "$dict" >> "$temp_file"
         sort -u "$temp_file" -o "$temp_file"
         aspell --lang="$lang" create master "$temp_dict" < "$temp_file"
         /bin/rm -f "$temp_file"
@@ -70,16 +70,15 @@ function cleanup() {
 # Spell checks content you're about to commit. Writes out words that are misspelled or exits with 0 (i.e. continues with
 # commit).
 function spell_check() {
-    words=$(git diff --cached | grep -e "^+[^+]" | aspell --mode=sgml list --add-sgml-skip={ulink,code,literal,firstname,parameter,option,package,replaceable,programlisting,userinput,screen,filename,command,computeroutput,abbrev,accel,orgname,surname,foreignphrase,acronym,hardware,keycap,systemitem,application} --lang="$lang" --extra-dicts=./"$temp_dict" | sort -u)
+    words=$(grep -v '^  ' "$1" | aspell --mode=sgml list --add-sgml-skip={ulink,code,literal,firstname,parameter,option,package,replaceable,programlisting,userinput,screen,filename,command,computeroutput,abbrev,accel,orgname,surname,foreignphrase,acronym,hardware,keycap,systemitem,application} --lang="$lang" --extra-dicts=./"$temp_dict" | sort -u)
     if [ ! "$words" ]; then
-        printf "%s\n" "No typos found during pre-commit. Proceeding with commit..."
+        printf "%s\n" "No typos found during commit msg. Proceeding with commit..."
         cleanup; exit 0
     fi
-    printf "%s\n" "Pre-commit Spell check failed on the following words:
+    printf "%s\n" "Commit message spell check failed on the following words:
 -------------------------------------------------"
     for word in $words; do
-        grep -m 1 --color=always --exclude-dir={.git,tmp} -HIrone "\<$word\>" $(git diff --cached --name-only --diff-filter=ACMRTUXB) | uniq | sort | awk -F ":" '{print "File: " $1 "\ton line: " $2 "\tTypo: " $3}'
-        printf "%s\n" "-------------------"
+        grep -m 1 --color=always --exclude-dir={.git,tmp} -HIrone "\<$word\>" $1 | sort | awk -F ":" '{print "On line: " $2 "\tTypo: " $3}'
     done
 }
 
@@ -116,7 +115,7 @@ Add any of the misspelled words into your custom dictionary?
                 add_none
                 cleanup; exit 1
                 ;;
-            *)
+            *) 
                 printf "%s\n" "Incorrect answer. Try again."
                 continue
         esac
@@ -149,7 +148,7 @@ function add_some() {
                     break ;;
                 n|no)
                     break ;;
-                *)
+                *) 
                     printf "%s\n" "Incorrect answer. Try again."
                     continue
             esac
@@ -169,6 +168,6 @@ function add_none() {
 
 
 prepare_dictionary
-spell_check
+spell_check "$1"
 add_words_to_dict
-echo "finished pre-commit spell check"
+echo "finished commit-message spell check"
